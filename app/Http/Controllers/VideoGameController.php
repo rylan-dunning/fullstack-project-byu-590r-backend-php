@@ -19,8 +19,7 @@ class VideoGameController extends BaseController
         
         foreach ($games as $game) {
             if ($game->file) {
-                $game->file_url = url('storage/' . $game->file);
-            }
+                $game->file_url = $this->getS3Url($game->file);            }
         }
         
         return $this->sendResponse($games, 'Video games retrieved successfully.');
