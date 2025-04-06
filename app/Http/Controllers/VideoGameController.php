@@ -50,20 +50,24 @@ class VideoGameController extends BaseController
         }
 
         $input = $request->all();
-        
-        // Handle file upload if present
+            
+            // Handle file upload to S3
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = 'images/' . $fileName;
             
-            // Store file in public disk
-            Storage::disk('public')->put($filePath, file_get_contents($file));
+            // Store file in S3
+            Storage::disk('s3')->put($filePath, file_get_contents($file));
             
             $input['file'] = $filePath;
         }
         
         $game = VideoGame::create($input);
+        
+        if ($game->file) {
+            $game->file_url = $this->getS3Url($game->file);
+        }
         
         return $this->sendResponse($game, 'Video game created successfully.');
     }
@@ -120,22 +124,26 @@ class VideoGameController extends BaseController
         
         // Handle file upload if present
         if ($request->hasFile('file')) {
-            // Remove old file if exists
+            // Delete old file from S3 if it exists
             if ($game->file) {
-                Storage::disk('public')->delete($game->file);
+                Storage::disk('s3')->delete($game->file);
             }
             
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = 'images/' . $fileName;
             
-            // Store file in public disk
-            Storage::disk('public')->put($filePath, file_get_contents($file));
+            // Store file in S3
+            Storage::disk('s3')->put($filePath, file_get_contents($file));
             
             $input['file'] = $filePath;
         }
         
         $game->update($input);
+        
+        if ($game->file) {
+            $game->file_url = $this->getS3Url($game->file);
+        }
         
         return $this->sendResponse($game, 'Video game updated successfully.');
     }
@@ -149,6 +157,11 @@ class VideoGameController extends BaseController
         
         if (is_null($game)) {
             return $this->sendError('Video game not found.');
+        }
+        
+        // Delete file from S3 if it exists
+        if ($game->file) {
+            Storage::disk('s3')->delete($game->file);
         }
         
         $game->delete();
