@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
+            EsrbRatingsSeeder::class, // This needs to run before VideoGamesSeeder
             VideoGamesSeeder::class
         ]);
 

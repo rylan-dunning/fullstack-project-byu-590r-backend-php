@@ -13,6 +13,17 @@ class VideoGame extends Model
         'title',
         'description',
         'file',
-        'year'
+        'year',
+        'esrb_rating_id'
     ];
+
+    /**
+     * Get the ESRB rating for this game.
+     */
+    
+    public function esrbRating()
+    {
+        return $this->belongsTo(EsrbRating::class);
+    }
+
 }

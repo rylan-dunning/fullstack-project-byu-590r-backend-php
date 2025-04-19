@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\API\BaseController;
 use App\Models\VideoGame;
+use App\Models\EsrbRating;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -43,6 +44,7 @@ class VideoGameController extends BaseController
             'description' => 'nullable|string',
             'year' => 'required|string|max:4',
             'file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'esrb_rating_id' => 'nullable|exists:esrb_ratings,id',
         ]);
 
         if ($validator->fails()) {
@@ -68,6 +70,8 @@ class VideoGameController extends BaseController
         if ($game->file) {
             $game->file_url = $this->getS3Url($game->file);
         }
+
+        $game->load('esrbRating');
         
         return $this->sendResponse($game, 'Video game created successfully.');
     }
@@ -77,7 +81,7 @@ class VideoGameController extends BaseController
      */
     public function show(string $id)
     {
-        $game = VideoGame::find($id);
+        $game = VideoGame::with('esrbRating')->find($id);
         
         if (is_null($game)) {
             return $this->sendError('Video game not found.');
@@ -108,6 +112,7 @@ class VideoGameController extends BaseController
             'description' => 'nullable|string',
             'year' => 'nullable|string|max:4',
             'file' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'esrb_rating_id' => 'nullable|exists:esrb_ratings,id',
         ]);
 
         if ($validator->fails()) {
@@ -144,6 +149,9 @@ class VideoGameController extends BaseController
         if ($game->file) {
             $game->file_url = $this->getS3Url($game->file);
         }
+
+        // Load the ESRB rating
+        $game->load('esrbRating');
         
         return $this->sendResponse($game, 'Video game updated successfully.');
     }
@@ -167,5 +175,15 @@ class VideoGameController extends BaseController
         $game->delete();
         
         return $this->sendResponse([], 'Video game deleted successfully.');
+    }
+
+    /**
+     * Get all ESRB ratings.
+     */
+    public function ratings()
+    {
+        $ratings = EsrbRating::all();
+        
+        return $this->sendResponse($ratings, 'ESRB ratings retrieved successfully.');
     }
 }

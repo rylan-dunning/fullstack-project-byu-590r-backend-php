@@ -23,6 +23,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::delete('user/remove_avatar','removeAvatar');
         Route::post('user/send_verification_email','sendVerificationEmail');
         Route::post('user/change_email', 'changeEmail');
+        Route::get('esrb-ratings', [VideoGameController::class, 'ratings']);
     });
 
     // Route::resource('video-games', VideoGameController::class);
