@@ -16,6 +16,9 @@ Route::controller(RegisterController::class)->group(function(){
     Route::post('logout','logout');
 });
 
+Route::resource('video-games', VideoGameController::class);
+Route::get('esrb-ratings', [VideoGameController::class, 'ratings']);
+
 Route::middleware('auth:sanctum')->group( function () {
     Route::controller(UserController::class)->group(function(){
         Route::get('user', 'getUser');
@@ -23,10 +26,9 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::delete('user/remove_avatar','removeAvatar');
         Route::post('user/send_verification_email','sendVerificationEmail');
         Route::post('user/change_email', 'changeEmail');
-        Route::get('esrb-ratings', [VideoGameController::class, 'ratings']);
+        
     });
 
     // Route::resource('video-games', VideoGameController::class);
 });
 
-Route::resource('video-games', VideoGameController::class);

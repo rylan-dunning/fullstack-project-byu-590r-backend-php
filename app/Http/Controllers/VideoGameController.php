@@ -16,11 +16,12 @@ class VideoGameController extends BaseController
      */
     public function index()
     {
-        $games = VideoGame::all();
+        $games = VideoGame::with('esrbRating')->get();
         
         foreach ($games as $game) {
             if ($game->file) {
-                $game->file_url = $this->getS3Url($game->file);            }
+                $game->file_url = $this->getS3Url($game->file);
+            }
         }
         
         return $this->sendResponse($games, 'Video games retrieved successfully.');
@@ -53,7 +54,7 @@ class VideoGameController extends BaseController
 
         $input = $request->all();
             
-            // Handle file upload to S3
+        // Handle file upload to S3
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = time() . '_' . $file->getClientOriginalName();
@@ -88,7 +89,7 @@ class VideoGameController extends BaseController
         }
         
         if ($game->file) {
-            $game->file_url = url('storage/' . $game->file);
+            $game->file_url = $this->getS3Url($game->file);
         }
         
         return $this->sendResponse($game, 'Video game retrieved successfully.');
@@ -179,6 +180,8 @@ class VideoGameController extends BaseController
 
     /**
      * Get all ESRB ratings.
+     *
+     * @return \Illuminate\Http\Response
      */
     public function ratings()
     {
