@@ -14,7 +14,7 @@ class SendGameRecommendations extends Command
      *
      * @var string
      */
-    protected $signature = 'videogames:recommendations {--email=}';
+    protected $signature = 'videogames:recommendations {--email=brdunning14@gmail.com}';
 
     /**
      * The console command description.
